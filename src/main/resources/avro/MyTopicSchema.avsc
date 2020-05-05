@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "name": "MyObject",
+  "namespace": "com.acme.messaging.avro",
+  "fields": [
+    {
+      "name": "uuid",
+      "type": "string"
+    },
+    {
+      "name": "payload",
+      "type": [
+        {
+          "type": "record",
+          "name": "MySubObject",
+          "fields": [
+            {
+              "name": "message",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    properties:
+      schema:
+        registry:
+          url: http://localhost:8081
+  cloud:
+    stream:
+      bindings:
+        my-topic-sink:
+          destination: my-topic
+          contentType: application/*+avro
+          group: my-group
+          consumer:
+            auto-commit-offset: false
+            use-native-decoding: true
+
+        my-topic-source:
+          destination: my-topic
+          contentType: application/*+avro
+          producer:
+            use-native-encoding: true
+
+      kafka:
+        binder:
+          configuration:
+            value:
+              serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+              deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer

@@ -1,0 +1,72 @@
+buildscript {
+	ext {
+		avroPluginVersion = '0.19.1'
+		avroSerializerVersion = '5.4.1'
+		springCloudVersion = 'Hoxton.SR4'
+	}
+
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath("com.commercehub.gradle.plugin:gradle-avro-plugin:${avroPluginVersion}")
+	}
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.2.6.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+}
+
+// plugin responsible for generating Java classes based on avsc files
+apply plugin: 'com.commercehub.gradle.plugin.avro'
+
+group = 'com.acme'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url "https://packages.confluent.io/maven/" }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// necessary dependencies to get kafka integration working
+	implementation 'org.springframework.cloud:spring-cloud-stream'
+	implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+	implementation "io.confluent:kafka-avro-serializer:${avroSerializerVersion}"
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-support'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
+
+generateAvroJava {
+	source 'src/main/resources/avro'
+	outputDir = file('src/main/java')
+	fieldVisibility = "PRIVATE"
+}
